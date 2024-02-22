@@ -1,3 +1,4 @@
+from urllib import response
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 #rest framework 
@@ -52,16 +53,21 @@ def user_details(request, username):
         return Response(serializer.data)
     
     if request.method =='PUT':
-        user.username = request.data['username']
-        user.email = request.data['email']
-        user.bio = request.data['bio']
-        user.role = request.data['role']
-        user.save()
-
+        user = Users.objects.get(username=username)
+        if user.username == username:
+            user= Users.objects.update(
+            username = request.data['username'],
+            email = request.data['email'],
+            bio = request.data['bio'],
+            role = request.data['role'])
+        
+        
+        
         serializer = UserDetsilserializer(user, many=False)
         return Response (serializer.data)
     
     if request.method == 'DELETE':
+        user = Users.objects.get(username=username)
         user.delete()
         return redirect('userdetails')
         
@@ -102,21 +108,24 @@ def individual_child_details(request, child_name):
         return Response(serializer.data)
 
     if request.method == 'PUT':
-        child_information.child_mane=request.data['child name']
-        child_information.location = request.data['location']
-        child_information.date_of_birth = request.data['date of birth']
-        child_information.gender = request.data['gender']
-        child_information.physical_description['physical description']
-        child_information.parent_contact= request.data['parent contact']
+        child_information=ChildInformation.objects.get(child_name=child_name)
+        if child_information.child_name == child_name:
+            child_information = ChildInformation.objects.update(
+            child_name=request.data['child name'],
+            location = request.data['location'],
+            date_of_birth = request.data['date of birth'],
+            gender = request.data['gender'],
+            physical_description= request.data['physical description'],
+            parent_contact= request.data['parent contact'])
 
-        child_information.save()
-
+        
         serializer = ChildInformationSerializer(child_information, many=False)
+        return Response(serializer.data)
 
-        return redirect('childdetails')
-
-    if request.method == 'DELETE':
-        child_information.delete()
+    if request.method == 'DELETE':        
+        child_information = ChildInformation.objects.get(child_name= child_name)
+        if child_name in child_information == child_name:
+            child_information.delete()
         return redirect('childdetails')
 
 
@@ -155,18 +164,22 @@ def individual_missing_person(request, name):
         return Response(serializer.data)
 
     if request.method =='PUT':
-        missing_person.name =request.data['name']
-        missing_person.date_of_birth = request.data['date of birth']
-        missing_person.gender = request.data['gender']
-        missing_person.physical_decription= request.data['physical description']
-        missing_person.family_contact = request.data['family contacct']
-        
-        missing_person.save()
+        missing_person = MissingPersons.objects.get(name=name)
+        if missing_person.name == name:
+            missing_person = MissingPersons.objects.update(
+            name = request.data['name'],
+            date_of_birth = request.data['date of birth'],
+            gender = request.data['gender'],
+            physical_description= request.data['physical description'],
+            family_contact= request.data['family contact'])
+
         serializer= MissinpersonSerializer(missing_person, many = False)
-        return redirect ('missingperson')
+        return Response (serializer.data)
     
     if request.method == 'DELETE':
-        missing_person.delete()
+        missing_person = MissingPersons.objects.get(name=name)
+        if name in missing_person == name:
+            missing_person.delete()
         return redirect('missingperson')
 
 

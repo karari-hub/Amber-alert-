@@ -5,11 +5,11 @@ from .models import Users,ChildInformation,Reports,MissingPersons,Alerts
 class UsersSerializer(ModelSerializer):
     class Meta:
         model = Users
-        fields = '__all__'
+        fields = ('id', 'username', 'email', 'bio', 'role')
 
 class UserDetsilserializer(ModelSerializer):
     model = Users
-    fields = '__all__'
+    fields= "__all__" # type: ignore
        
 
 class ChildInformationSerializer(ModelSerializer):
