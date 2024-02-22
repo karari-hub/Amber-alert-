@@ -21,7 +21,7 @@ urlpatterns =[
     path('users/', views.users_list, name='users'),
     path('users/<str:username>/', views.user_details, name= 'userdetails '),
     path('child details/', views.child_details, name='childdetails'),
-    path('child details/<str:child_name>/', views.individual_child_details),
+    path('child details/<str:child_name>/', views.individual_child_details, name='individualchilddetails'),
     path('reports/',views.reports, name = 'reports'),
     path('reports/<str:report_type>', views.report_types, name='reporttypes'),
     path('missing person/', views.missing_person_details, name='missingperson'),

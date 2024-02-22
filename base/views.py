@@ -56,8 +56,8 @@ def user_details(request, username):
         user = Users.objects.get(username=username)
         if user.username == username:
             user= Users.objects.update(
-            username = request.data['username'],
-            email = request.data['email'],
+            username = request.data['username'] ,
+            email = request.data['email'] ,
             bio = request.data['bio'],
             role = request.data['role'])
         
@@ -67,9 +67,11 @@ def user_details(request, username):
         return Response (serializer.data)
     
     if request.method == 'DELETE':
-        user = Users.objects.get(username=username)
-        user.delete()
-        return redirect('userdetails')
+        user_details = Users.objects.get(username=username)
+        if user_details.username == username:
+            user_details.delete()
+            
+        return redirect('users/<str:username>')
         
 
 @api_view(['GET','POST'])

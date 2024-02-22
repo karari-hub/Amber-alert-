@@ -5,7 +5,7 @@ from django.db import models
 class Users(models.Model):
    username= models.CharField(unique=True, max_length=255, null=True)
    email= models.EmailField(unique=True, max_length=255, null=True) 
-   bio = models.TextField(max_length=255, null=True, blank=True)
+   bio = models.TextField(max_length=255, blank=True)
    roles= [
       ("Citizen","Citizen"),
       ("Parent", "parent"),
