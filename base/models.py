@@ -1,18 +1,21 @@
+from email.policy import default
 from django.db import models
 
 
 # Create your models here.
 class Users(models.Model):
-   username= models.CharField(unique=True, max_length=255, null=True)
-   email= models.EmailField(unique=True, max_length=255, null=True) 
-   bio = models.TextField(max_length=255, blank=True)
-   roles= [
+   ROLES= [
       ("Citizen","Citizen"),
       ("Parent", "parent"),
       ("Guardian","guardian"),
       ("Law_Enforcer","Law enforcer/police"),
    ] 
-   role =models.CharField(max_length=30, choices=roles, null=True) 
+   
+   username= models.CharField(unique=True, max_length=255, null=False)
+   email= models.EmailField(unique=True, max_length=255, null=False) 
+   bio = models.TextField(max_length=255,null=True, blank=True)
+
+   role =models.CharField(max_length=30, choices=ROLES, null=True) 
 
    def __str__(self):
       return self.username

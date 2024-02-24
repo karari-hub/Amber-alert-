@@ -1,3 +1,4 @@
+from dataclasses import fields
 from rest_framework.serializers import ModelSerializer,SerializerMethodField
 from .models import Users,ChildInformation,Reports,MissingPersons,Alerts
 
@@ -5,11 +6,12 @@ from .models import Users,ChildInformation,Reports,MissingPersons,Alerts
 class UsersSerializer(ModelSerializer):
     class Meta:
         model = Users
-        fields = ('id', 'username', 'email', 'bio', 'role')
+        fields =('username', 'email', 'bio', 'role')
 
-class UserDetsilserializer(ModelSerializer):
-    model = Users
-    fields= "__all__" # type: ignore
+class UserDetailserializer(ModelSerializer):
+    class Meta:
+        model = Users
+        exclude = ['bio']
        
 
 class ChildInformationSerializer(ModelSerializer):

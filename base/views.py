@@ -1,11 +1,13 @@
 from urllib import response
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 #rest framework 
 #rest decorators (view&class bassed)
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
 
 #models
 from .models import Users,ChildInformation,Reports,MissingPersons,Alerts
@@ -13,65 +15,54 @@ from django.db.models import Q
 
 #serializers
 from base import serializers
-from .serializers import UsersSerializer,ChildInformationSerializer, UserDetsilserializer, ReportsSerializer,MissinpersonSerializer,MissingchildreportSeriallzer,MissingpersonreportSerializer,AlertsSerializer
+from .serializers import UsersSerializer,ChildInformationSerializer, UserDetailserializer, ReportsSerializer,MissinpersonSerializer,MissingchildreportSeriallzer,MissingpersonreportSerializer,AlertsSerializer
 
 
 # Create your views here.
 @api_view(['GET'])
 def endpoints(request):
-    data =['/users','/users/:username', 'child details','reports', 'missing person','alerts']
+    data =['/users','/users/:username', '/child details','/reports', '/missing person','/alerts']
     return Response (data)
 
 @api_view(['GET','POST'])
 def users_list(request):
     if request.method == 'GET':
-        query= request.GET.get('query')
-        if query == None:
-            query = ''
-            user=Users.objects.filter(Q(username__icontains=query) | Q(email__icontains=query))
-
-            serilaizer = UsersSerializer(user, many=False)
-            return Response(serilaizer.data)
+        users = Users.objects.all()
+        serilaizer = UsersSerializer(users, many=True)
+        return Response(serilaizer.data)
     
     if request.method =='POST':
-        user = Users.objects.create(
-            username = request.data['username'],
-            email = request.data['email'],
-            role = request.data['role']
-        )
-
-        serilaizer = UsersSerializer(user, many=False)
-        return redirect('users')
+        serializer = UsersSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()        
+            return redirect('users')
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
 
 @api_view(['GET','PUT', 'DELETE'])
 # @permission_classes([IsAuthenticated])
 def user_details(request, username):
+    user = get_object_or_404(Users, username=username)
 
     if request.method =='GET':
-        user = Users.objects.get(username=username)
-        serializer= UsersSerializer(user, many=False)
+        serializer = UserDetailserializer(user)
         return Response(serializer.data)
+                                         
+            
     
     if request.method =='PUT':
-        user = Users.objects.get(username=username)
-        if user.username == username:
-            user= Users.objects.update(
-            username = request.data['username'] ,
-            email = request.data['email'] ,
-            bio = request.data['bio'],
-            role = request.data['role'])
-        
-        
-        
-        serializer = UserDetsilserializer(user, many=False)
-        return Response (serializer.data)
+        serializer = UserDetailserializer(user, data= request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     
     if request.method == 'DELETE':
-        user_details = Users.objects.get(username=username)
-        if user_details.username == username:
-            user_details.delete()
-            
-        return redirect('users/<str:username>')
+    
+        user.delete()
+        return Response(status = status.HTTP_204_NO_CONTENT)
+
         
 
 @api_view(['GET','POST'])
@@ -102,32 +93,29 @@ def child_details(request):
 
 
 @api_view(['GET','PUT','DELETE'])
-
+#add authentication and authorisation for put and delete requests 
 def individual_child_details(request, child_name):
+    child_information = ChildInformation.objects.get(child_name=child_name)
+    
+    
     if request.method =='GET':
-        child_information = ChildInformation.objects.get(child_name=child_name)
         serializer = ChildInformationSerializer(child_information, many=False)
         return Response(serializer.data)
 
     if request.method == 'PUT':
-        child_information=ChildInformation.objects.get(child_name=child_name)
-        if child_information.child_name == child_name:
-            child_information = ChildInformation.objects.update(
-            child_name=request.data['child name'],
-            location = request.data['location'],
-            date_of_birth = request.data['date of birth'],
-            gender = request.data['gender'],
-            physical_description= request.data['physical description'],
-            parent_contact= request.data['parent contact'])
+        child_information.child_name = request.data['child_name']
+        child_information.location = request.data['location']
+        child_information.date_of_birth = request.data['date_of_birth']
+        child_information.gender = request.data['gender']
+        child_information.physical_description = request.data['physical_description']
+        child_information.parent_contact = request.data['parent_contact']
 
         
         serializer = ChildInformationSerializer(child_information, many=False)
         return Response(serializer.data)
 
     if request.method == 'DELETE':        
-        child_information = ChildInformation.objects.get(child_name= child_name)
-        if child_name in child_information == child_name:
-            child_information.delete()
+        child_information.delete()
         return redirect('childdetails')
 
 
@@ -160,28 +148,26 @@ def missing_person_details(request):
 
 @api_view(['GET','PUT','DELETE'])
 def individual_missing_person(request, name):
+    missing_person = MissingPersons.objects.get(name=name)
+    
     if request.method == 'GET':
-        missing_person = MissingPersons.objects.get(name=name)
         serializer = MissinpersonSerializer(missing_person, many=False)
         return Response(serializer.data)
 
     if request.method =='PUT':
-        missing_person = MissingPersons.objects.get(name=name)
-        if missing_person.name == name:
-            missing_person = MissingPersons.objects.update(
-            name = request.data['name'],
-            date_of_birth = request.data['date of birth'],
-            gender = request.data['gender'],
-            physical_description= request.data['physical description'],
-            family_contact= request.data['family contact'])
+        missing_person.name = request.data['name']
+        missing_person.location = request.data['location']
+        missing_person.date_of_birth = request.data['date of birth']
+        missing_person.gender = request.data['gender']
+        missing_person.physical_description = request.data['physical description']
+        missing_person.family_contact=request.data['family_contact']
+
 
         serializer= MissinpersonSerializer(missing_person, many = False)
         return Response (serializer.data)
     
     if request.method == 'DELETE':
-        missing_person = MissingPersons.objects.get(name=name)
-        if name in missing_person == name:
-            missing_person.delete()
+        missing_person.delete()
         return redirect('missingperson')
 
 
