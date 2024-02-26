@@ -49,7 +49,7 @@ INSTALLED_APPS = [
 ]
 
 
-# AUTH_USER_MODEL = ''
+# AUTH_USER_MODEL = 'base.models.user'
 
 
 MIDDLEWARE = [
