@@ -1,7 +1,9 @@
+from inspect import isasyncgenfunction
 from urllib import response
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+
 #rest framework 
 #rest decorators (view&class bassed)
 from rest_framework.decorators import api_view, permission_classes
@@ -17,14 +19,60 @@ from django.db.models import Q
 from base import serializers
 from .serializers import UsersSerializer,ChildInformationSerializer, UserDetailserializer, ReportsSerializer,MissinpersonSerializer,MissingchildreportSeriallzer,MissingpersonreportSerializer,AlertsSerializer
 
+#CUSTOM TOKEN IMPORT 
+# from django.contrib.auth.models import User,AbstractBaseUser
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+
 
 # Create your views here.
+
+#SIMPLE JWT CUSTOMIZING TOKEN CLAIM
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # Add custom claims
+        token['username'] = user.get_username()
+        # ...
+
+        return token
+    
+class MyTokenObtainPairview(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
+
+#LOGIN/LOGOOUT/REGISTRATION AND AUTHORIZATION
+@api_view(['POST'])
+def login(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        
+        
+        
+    return
+
+@api_view(['POST'])
+def sign_up(request):
+    return
+
+@api_view(['POST'])
+def logout(request):
+    return
+
+#CRUD OPERATIONS
+
+#reminder "add image upload function and connect it to s3"
 @api_view(['GET'])
 def endpoints(request):
-    data =['/users','/users/:username', '/child details','/reports', '/missing person','/alerts']
+    data =['/users','/users/:username', '/child details','/reports', '/missing person','/alerts', '/login', '/logout', '/signup']
     return Response (data)
 
 @api_view(['GET','POST'])
+@permission_classes([IsAuthenticated])
 def users_list(request):
     if request.method == 'GET':
         users = Users.objects.all()
@@ -40,7 +88,7 @@ def users_list(request):
         
 
 @api_view(['GET','PUT', 'DELETE'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def user_details(request, username):
     user = get_object_or_404(Users, username=username)
 
@@ -66,7 +114,7 @@ def user_details(request, username):
         
 
 @api_view(['GET','POST'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def child_details(request):
 
     if request.method == 'GET':
@@ -93,7 +141,7 @@ def child_details(request):
 
 
 @api_view(['GET','PUT','DELETE'])
-#add authentication and authorisation for put and delete requests 
+@permission_classes([IsAuthenticated])
 def individual_child_details(request, child_name):
     child_information = ChildInformation.objects.get(child_name=child_name)
     
@@ -120,7 +168,7 @@ def individual_child_details(request, child_name):
 
 
 @api_view(['GET','POST'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def missing_person_details(request):
 
     if request.method == 'GET':
@@ -147,6 +195,7 @@ def missing_person_details(request):
 
 
 @api_view(['GET','PUT','DELETE'])
+@permission_classes([IsAuthenticated])
 def individual_missing_person(request, name):
     missing_person = MissingPersons.objects.get(name=name)
     
@@ -173,6 +222,7 @@ def individual_missing_person(request, name):
 
     
 @api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
 def reports(request):
     report= Reports.objects.all()
 
@@ -196,7 +246,7 @@ def reports(request):
     
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def report_types(request, report_type):
         
     if request.method =='GET':    
@@ -219,5 +269,6 @@ def alerts(request):
         serializer = AlertsSerializer(alert,many=True)
 
         return Response(serializer.data)
+
 
 

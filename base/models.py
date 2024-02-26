@@ -1,4 +1,5 @@
 from email.policy import default
+from enum import unique
 from django.db import models
 
 
@@ -14,7 +15,6 @@ class Users(models.Model):
    username= models.CharField(unique=True, max_length=255, null=False)
    email= models.EmailField(unique=True, max_length=255, null=False) 
    bio = models.TextField(max_length=255,null=True, blank=True)
-
    role =models.CharField(max_length=30, choices=ROLES, null=True) 
 
    def __str__(self):
