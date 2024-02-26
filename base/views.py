@@ -44,24 +44,21 @@ class MyTokenObtainPairview(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 #LOGIN/LOGOOUT/REGISTRATION AND AUTHORIZATION
-@api_view(['POST'])
-def login(request):
-    if request.method == 'POST':
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-
+# @api_view(['POST'])
+# def login(request):
+#     if request.method == 'POST':
+#         email = request.POST.get('email')
+#         password = request.POST.get('password')       
         
-        
-        
-    return
+#     return
 
-@api_view(['POST'])
-def sign_up(request):
-    return
+# @api_view(['POST'])
+# def sign_up(request):
+#     return
 
-@api_view(['POST'])
-def logout(request):
-    return
+# @api_view(['POST'])
+# def logout(request):
+#     return
 
 #CRUD OPERATIONS
 

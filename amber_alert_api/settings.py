@@ -48,6 +48,10 @@ INSTALLED_APPS = [
     'corsheaders',
 ]
 
+
+# AUTH_USER_MODEL = ''
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     

@@ -1,8 +1,19 @@
 from dataclasses import fields
 from rest_framework.serializers import ModelSerializer,SerializerMethodField
-from .models import Users,ChildInformation,Reports,MissingPersons,Alerts
+from .models import Users,ChildInformation,Reports,MissingPersons,Alerts, CustomUser, UserManager
 
 #serializers 
+class CustomUserSerializer(ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = '__all__'
+
+class UsermanagerSerializer(ModelSerializer):
+    class Meta:
+        model = UserManager
+        fields = '__all__'
+
+
 class UsersSerializer(ModelSerializer):
     class Meta:
         model = Users

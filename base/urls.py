@@ -17,9 +17,9 @@ urlpatterns =[
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), 
 
     #login , logout and signup views
-    path('login/', views.login, name='login'),
-    path('logout/', views.logout, name='logout'),
-    path('sign_up/', views.sign_up, name='sign up'),
+    # path('login/', views.login, name='login'),
+    # path('logout/', views.logout, name='logout'),
+    # path('sign_up/', views.sign_up, name='sign up'),
 
     #crud view urls
     path('users/', views.users_list, name='users'),

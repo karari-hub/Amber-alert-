@@ -1,9 +1,89 @@
 from email.policy import default
 from enum import unique
+from typing import Any
 from django.db import models
-
+from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 # Create your models here.
+class UserManager(BaseUserManager):
+   def create_user(self, email, password=None, is_active = True,  is_law_enforcer=False, is_parent=False, is_citizen=False, is_guardian=False ):
+      if not email or not password:
+         raise ValueError ("Please provide an email address and password")
+      user = self.model(
+         email = self.normalize_email(email)
+      )
+      user.set_password(password)
+      user.law_enforcer = is_law_enforcer
+      user.parent = is_parent
+      user.guardian = is_guardian
+      user.citizen = is_citizen
+      user.active = is_active
+      user.save()
+      return user
+   
+   def create_lawenforceruser(self, email, password):
+      user = self.create_user(email, password = password, is_law_enforcer=True)
+      return user
+   
+   def create_guardianuser(self, email, password):
+      user = self.create_user(email, password = password, is_guardian=True)
+      return user
+   
+   def create_parentuser(self, email, password):
+      user = self.create_user(email, password = password, is_parent=True)
+      return user
+   
+   def create_citizenuser(self, email, password):
+      user = self.create_user(email, password = password, is_parent=True)
+      return user
+
+   
+
+
+class CustomUser(AbstractBaseUser):
+   email = models.EmailField(unique=True, max_length=255, null=False)
+   # fullname = models.CharField(max_length=255, unique=True)
+   active = models.BooleanField(default=True)
+   parent = models.BooleanField(default=False)
+   guardian = models.BooleanField(default=False)
+   law_enforcer = models.BooleanField(default=False)
+   citizen  = models.BooleanField(default=False)
+   timestamp = models.DateTimeField(auto_now_add=True)
+   
+   USERNAME_FIELD = 'email'
+   REQUIRED_FIELDS = []
+   
+   objects = UserManager()
+   def __str__(self):
+      return self.email
+   def get_full_name(self):
+      return self.email
+   
+   def get_short_name(self):
+      return self.email
+   
+   @property
+   def is_law_enforcer(self):
+      return self.law_enforcer
+   
+   @property
+   def is_guardian(self):
+      return self.guardian
+   
+   @property
+   def is_parent(self):
+      return self.parent
+   
+   @property
+   def is_citizen(self):
+      return self.citizen
+   
+   
+   
+
+
+
 class Users(models.Model):
    ROLES= [
       ("Citizen","Citizen"),
@@ -13,7 +93,7 @@ class Users(models.Model):
    ] 
    
    username= models.CharField(unique=True, max_length=255, null=False)
-   email= models.EmailField(unique=True, max_length=255, null=False) 
+   email = models.EmailField(unique=True, max_length=255, null=False)
    bio = models.TextField(max_length=255,null=True, blank=True)
    role =models.CharField(max_length=30, choices=ROLES, null=True) 
 
@@ -31,7 +111,7 @@ class Locationdata(models.Model):
    town= models.CharField(max_length=255, null=True)
 
    def __str__(self):
-      return self.country
+      return self.county
 
 
 class ChildInformation(models.Model):
