@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 # Create your models here.
-class UserManager(BaseUserManager):
+class CustomUserManager(BaseUserManager):
    def create_user(self, email, password=None, is_active = True,  is_law_enforcer=False, is_parent=False, is_citizen=False, is_guardian=False ):
       if not email or not password:
          raise ValueError ("Please provide an email address and password")
@@ -19,7 +19,7 @@ class UserManager(BaseUserManager):
       user.guardian = is_guardian
       user.citizen = is_citizen
       user.active = is_active
-      user.save()
+      user.save(using = self._db)
       return user
    
    def create_lawenforceruser(self, email, password):
@@ -41,9 +41,10 @@ class UserManager(BaseUserManager):
    
 
 
-class CustomUser(AbstractBaseUser):
+class CustomUser(AbstractBaseUser):      
+      
    email = models.EmailField(unique=True, max_length=255, null=False)
-   # fullname = models.CharField(max_length=255, unique=True)
+   fullname = models.CharField(max_length=255, unique=True)
    active = models.BooleanField(default=True)
    parent = models.BooleanField(default=False)
    guardian = models.BooleanField(default=False)
@@ -51,10 +52,14 @@ class CustomUser(AbstractBaseUser):
    citizen  = models.BooleanField(default=False)
    timestamp = models.DateTimeField(auto_now_add=True)
    
+   
+     
    USERNAME_FIELD = 'email'
    REQUIRED_FIELDS = []
    
-   objects = UserManager()
+   objects = CustomUserManager()
+   class Meta:
+      db_table = 'base_customuser'
    def __str__(self):
       return self.email
    def get_full_name(self):
@@ -84,16 +89,15 @@ class CustomUser(AbstractBaseUser):
 
 
 
-class Users(models.Model):
+class UserProfile(models.Model):
    ROLES= [
       ("Citizen","Citizen"),
       ("Parent", "parent"),
       ("Guardian","guardian"),
       ("Law_Enforcer","Law enforcer/police"),
    ] 
-   
+   email = models.ForeignKey(CustomUser, null=True, on_delete=models.CASCADE)
    username= models.CharField(unique=True, max_length=255, null=False)
-   email = models.EmailField(unique=True, max_length=255, null=False)
    bio = models.TextField(max_length=255,null=True, blank=True)
    role =models.CharField(max_length=30, choices=ROLES, null=True) 
 
@@ -115,7 +119,7 @@ class Locationdata(models.Model):
 
 
 class ChildInformation(models.Model):
-   user= models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,blank=True)
+   user= models.ForeignKey(CustomUser,on_delete=models.SET_NULL,null=True,blank=True)
    child_name = models.CharField(max_length=255, null=True)
    location = models.ForeignKey(Locationdata, on_delete= models.SET_NULL, null=True)
    date_of_birth = models.DateField()
@@ -130,7 +134,7 @@ class ChildInformation(models.Model):
 
 
 class MissingPersons(models.Model):
-   user= models.ForeignKey(Users, on_delete=models.SET_NULL, null=True, blank=True)
+   user= models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
    location = models.ForeignKey(Locationdata, on_delete=models.SET_NULL,null=True)
    name= models.CharField(max_length=255, null=True)
    date_of_birth = models.DateField()
@@ -143,7 +147,7 @@ class MissingPersons(models.Model):
 
 
 class Reports(models.Model):
-   users = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True, blank=True)
+   users = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
    child =models.ForeignKey(ChildInformation, on_delete=models.SET_NULL, null=True, blank=True)
    missing_person =models.ForeignKey(MissingPersons, on_delete=models.SET_NULL, null=True, blank=True)
    Location = models.ForeignKey(Locationdata, on_delete=models.SET_NULL,null=True, blank=True)
@@ -164,7 +168,7 @@ class Reports(models.Model):
 
 
 class Alerts(models.Model):
-   user = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True, blank=True)
+   user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
    location = models.ForeignKey(Locationdata, on_delete=models.SET_NULL, null=True)
    alert_tittle = models.CharField(max_length=255, null=True)
    alert_types =[
@@ -187,7 +191,7 @@ class Alerts(models.Model):
    
 
 class Messages(models.Model):
-   user = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True)
+   user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
    report = models.ForeignKey(Reports, on_delete=models.SET_NULL, null=True)
    alerts =models.ForeignKey(Alerts, on_delete=models.SET_NULL, null=True)
    created = models.DateTimeField(auto_now_add=True)
@@ -200,7 +204,7 @@ class Messages(models.Model):
 
 
 class AlertRecipients(models.Model):
-   user = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True)
+   user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
    alert = models.ForeignKey(Alerts, on_delete=models.SET_NULL,null=True)
 
    def __str__(self):

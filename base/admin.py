@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Users, ChildInformation, MissingPersons,Reports,Alerts,AlertRecipients,Messages
+from .models import  UserProfile, ChildInformation, MissingPersons,Reports,Alerts,AlertRecipients,Messages
+
 
 from django.contrib.auth import get_user_model
 
@@ -17,7 +18,7 @@ class UserAdmin(admin.ModelAdmin):
 admin.site.register(User, UserAdmin)
 
 # Register your models here.
-admin.site.register(Users)
+admin.site.register(UserProfile)
 admin.site.register(ChildInformation)
 admin.site.register(MissingPersons)
 admin.site.register(Reports)

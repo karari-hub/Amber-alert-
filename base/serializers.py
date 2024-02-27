@@ -1,6 +1,6 @@
 from dataclasses import fields
 from rest_framework.serializers import ModelSerializer,SerializerMethodField
-from .models import Users,ChildInformation,Reports,MissingPersons,Alerts, CustomUser, UserManager
+from .models import CustomUserManager, UserProfile, UserProfile,ChildInformation,Reports,MissingPersons,Alerts, CustomUser, CustomUserManager
 
 #serializers 
 class CustomUserSerializer(ModelSerializer):
@@ -8,32 +8,32 @@ class CustomUserSerializer(ModelSerializer):
         model = CustomUser
         fields = '__all__'
 
-class UsermanagerSerializer(ModelSerializer):
+class CustomUsermanagerSerializer(ModelSerializer):
     class Meta:
-        model = UserManager
+        model = CustomUserManager
         fields = '__all__'
 
 
-class UsersSerializer(ModelSerializer):
+class UserProfileSerializer(ModelSerializer):
     class Meta:
-        model = Users
+        model = UserProfile
         fields =('username', 'email', 'bio', 'role')
 
 class UserDetailserializer(ModelSerializer):
     class Meta:
-        model = Users
+        model = UserProfile
         exclude = ['bio']
        
 
 class ChildInformationSerializer(ModelSerializer):
-    user = UsersSerializer()
+    user = CustomUserSerializer()
     class Meta:
         model = ChildInformation
         fields = "__all__"
 
 
 class MissinpersonSerializer(ModelSerializer):
-    user = UsersSerializer()
+    user = CustomUserSerializer()
     class Meta:
         model = MissingPersons
         fields ='__all__'
@@ -41,14 +41,14 @@ class MissinpersonSerializer(ModelSerializer):
 
 
 class ReportsSerializer(ModelSerializer):
-    user = UsersSerializer()
+    user = CustomUserSerializer()
     class Meta:
         model= Reports
         fields = "__all__"
 
 
 class MissingpersonreportSerializer(ModelSerializer):
-    user=UsersSerializer()
+    user= CustomUserSerializer()
     missing_person = MissinpersonSerializer()
     class Meta:
         model = Reports
@@ -56,14 +56,14 @@ class MissingpersonreportSerializer(ModelSerializer):
 
 
 class MissingchildreportSeriallzer(ModelSerializer):
-    User=UsersSerializer()
+    User=CustomUserSerializer()
     child = ChildInformationSerializer()
     class Meta:
         model = Reports
         exclude =['missing_person']
 
 class AlertsSerializer(ModelSerializer):
-    user =UsersSerializer()
+    user = CustomUserSerializer()
     class Meta:
         model = Alerts
         fields = '__all__'

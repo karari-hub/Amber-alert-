@@ -22,8 +22,8 @@ urlpatterns =[
     # path('sign_up/', views.sign_up, name='sign up'),
 
     #crud view urls
-    path('users/', views.users_list, name='users'),
-    path('users/<username>/', views.user_details, name= 'userdetails '),
+    path('userprofile/', views.users_list, name='userprofile'),
+    path('userprofile/<username>/', views.user_details, name= 'userprofiledetails '),
     path('child details/', views.child_details, name='childdetails'),
     path('child details/<child_name>/', views.individual_child_details, name='individualchilddetails'),
     path('reports/',views.reports, name = 'reports'),

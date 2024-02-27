@@ -12,12 +12,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
 #models
-from .models import Users,ChildInformation,Reports,MissingPersons,Alerts
+from .models import UserProfile,ChildInformation,Reports,MissingPersons,Alerts,CustomUser,CustomUserManager
 from django.db.models import Q
 
 #serializers
 from base import serializers
-from .serializers import UsersSerializer,ChildInformationSerializer, UserDetailserializer, ReportsSerializer,MissinpersonSerializer,MissingchildreportSeriallzer,MissingpersonreportSerializer,AlertsSerializer
+from .serializers import CustomUserSerializer,CustomUsermanagerSerializer,UserProfileSerializer,ChildInformationSerializer, UserDetailserializer, ReportsSerializer,MissinpersonSerializer,MissingchildreportSeriallzer,MissingpersonreportSerializer,AlertsSerializer
 
 #CUSTOM TOKEN IMPORT 
 # from django.contrib.auth.models import User,AbstractBaseUser
@@ -35,7 +35,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
 
         # Add custom claims
-        token['username'] = user.get_username()
+        token['email'] = user.get_email_field_name
         # ...
 
         return token
@@ -65,19 +65,19 @@ class MyTokenObtainPairview(TokenObtainPairView):
 #reminder "add image upload function and connect it to s3"
 @api_view(['GET'])
 def endpoints(request):
-    data =['/users','/users/:username', '/child details','/reports', '/missing person','/alerts', '/login', '/logout', '/signup']
+    data =['/userprofile','/userprofile/:username', '/child details','/reports', '/missing person','/alerts', '/login', '/logout', '/signup']
     return Response (data)
 
 @api_view(['GET','POST'])
 @permission_classes([IsAuthenticated])
 def users_list(request):
     if request.method == 'GET':
-        users = Users.objects.all()
-        serilaizer = UsersSerializer(users, many=True)
+        users = UserProfile.objects.all()
+        serilaizer = UserProfileSerializer(users, many=True)
         return Response(serilaizer.data)
     
     if request.method =='POST':
-        serializer = UsersSerializer(data=request.data)
+        serializer = UserProfileSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()        
             return redirect('users')
@@ -87,7 +87,7 @@ def users_list(request):
 @api_view(['GET','PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def user_details(request, username):
-    user = get_object_or_404(Users, username=username)
+    user = get_object_or_404(UserProfile, username=username)
 
     if request.method =='GET':
         serializer = UserDetailserializer(user)
