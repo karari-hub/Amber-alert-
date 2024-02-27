@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import  UserProfile, ChildInformation, MissingPersons,Reports,Alerts,AlertRecipients,Messages
+from .models import  CustomUser, UserProfile, ChildInformation, MissingPersons,Reports,Alerts,AlertRecipients,Messages
 
 
 from django.contrib.auth import get_user_model
@@ -13,9 +13,9 @@ User = get_user_model()
 class UserAdmin(admin.ModelAdmin):
     search_fields = ['email']
     class Meta:
-        model= User
+        model= CustomUser
 
-admin.site.register(User, UserAdmin)
+admin.site.register(CustomUser, UserAdmin)
 
 # Register your models here.
 admin.site.register(UserProfile)

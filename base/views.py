@@ -12,7 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
 #models
-from .models import UserProfile,ChildInformation,Reports,MissingPersons,Alerts,CustomUser,CustomUserManager
+from .models import CustomUser,CustomUserManager,UserProfile, ChildInformation,MissingPersons,Reports,Alerts
 from django.db.models import Q
 
 #serializers
@@ -85,7 +85,7 @@ def users_list(request):
         
 
 @api_view(['GET','PUT', 'DELETE'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated]) 
 def user_details(request, username):
     user = get_object_or_404(UserProfile, username=username)
 

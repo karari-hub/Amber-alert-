@@ -7,14 +7,17 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 # Create your models here.
 class CustomUserManager(BaseUserManager):
-   def create_user(self, email, password=None, is_active = True,  is_law_enforcer=False, is_parent=False, is_citizen=False, is_guardian=False ):
+   def create_user(self, email, password=None,is_active = True, is_law_enforcer=False, is_parent=False, is_citizen=False, is_guardian=False, is_admin=False, is_staff=False ):
       if not email or not password:
          raise ValueError ("Please provide an email address and password")
+
       user = self.model(
          email = self.normalize_email(email)
       )
       user.set_password(password)
       user.law_enforcer = is_law_enforcer
+      user.admin = is_admin
+      user.staff = is_staff
       user.parent = is_parent
       user.guardian = is_guardian
       user.citizen = is_citizen
@@ -22,19 +25,29 @@ class CustomUserManager(BaseUserManager):
       user.save(using = self._db)
       return user
    
-   def create_lawenforceruser(self, email, password):
-      user = self.create_user(email, password = password, is_law_enforcer=True)
+   
+   def create_superuser(self, email, password=None):
+      user = self.create_user(email, password=password, is_active=True, is_admin=True)
+      return user
+      
+   def create_staffuser(self, email, password=None):
+      user = self.create_user(email, password=password, is_active=True, is_staff=True)
+      return user
+      
+   
+   def create_lawenforceruser(self, email, password=None):
+      user = self.create_user(email, password = password, is_law_enforcer=True, is_admin=True)
       return user
    
-   def create_guardianuser(self, email, password):
+   def create_guardianuser(self, email, password=None):
       user = self.create_user(email, password = password, is_guardian=True)
       return user
    
-   def create_parentuser(self, email, password):
+   def create_parentuser(self, email, password=None):
       user = self.create_user(email, password = password, is_parent=True)
       return user
    
-   def create_citizenuser(self, email, password):
+   def create_citizenuser(self, email, password=None):
       user = self.create_user(email, password = password, is_parent=True)
       return user
 
@@ -44,8 +57,10 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractBaseUser):      
       
    email = models.EmailField(unique=True, max_length=255, null=False)
-   fullname = models.CharField(max_length=255, unique=True)
+   fullname = models.CharField(max_length=255,null=True, blank=True)
    active = models.BooleanField(default=True)
+   admin = models.BooleanField(default=False)
+   staff = models.BooleanField(default=False)
    parent = models.BooleanField(default=False)
    guardian = models.BooleanField(default=False)
    law_enforcer = models.BooleanField(default=False)
@@ -67,6 +82,14 @@ class CustomUser(AbstractBaseUser):
    
    def get_short_name(self):
       return self.email
+   
+   @property
+   def is_admin(self):
+      return self.admin
+   
+   @property
+   def is_staff(self):
+      return self.staff
    
    @property
    def is_law_enforcer(self):
