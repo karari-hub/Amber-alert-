@@ -11,8 +11,14 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
+#login 
+# from base.forms import createUserForm
+# from django.contrib import messages
+#from django.contrib.auth import login, authenticate , logout 
+# from django.contrib.auth.decorators import login_required
+
 #models
-from .models import CustomUser,CustomUserManager,UserProfile, ChildInformation,MissingPersons,Reports,Alerts
+from .models import CustomUser,CustomUserManager, Messages,UserProfile, ChildInformation,MissingPersons,Reports,Alerts
 from django.db.models import Q
 
 #serializers
@@ -24,7 +30,8 @@ from .serializers import CustomUserSerializer,CustomUsermanagerSerializer,UserPr
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-
+#import forms
+from django.contrib.auth.forms import UserCreationForm
 
 # Create your views here.
 
@@ -43,22 +50,47 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 class MyTokenObtainPairview(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
-#LOGIN/LOGOOUT/REGISTRATION AND AUTHORIZATION
+# #LOGIN/LOGOOUT/REGISTRATION AND AUTHORIZATION
 # @api_view(['POST'])
 # def login(request):
 #     if request.method == 'POST':
 #         email = request.POST.get('email')
-#         password = request.POST.get('password')       
+#         password = request.POST.get('password')
         
+#         user = authenticate(request, email=email, password=password)
+        
+#         if user is not None:
+#             if user.is_active:
+#                 login(request, user)
+#                 return Response(status=status.HTTP_200_OK)
+#             else:
+#                 return Response(status=status.HTTP_400_BAD_REQUEST)
+
 #     return
+
 
 # @api_view(['POST'])
 # def sign_up(request):
-#     return
+#     if request.user.is_authenticated:
+#         return redirect ('')
+#     else:
+
+#     #     form = createUserForm(request.POST)
+#     #     if form.is_valid():
+#     #         form.save()
+#     #         user = form.cleaned_data.get['email']
+#     #         messages.success(request, 'Account was created for' + user)
+#     #     return Response (status= status.HTTP_201_OK)
 
 # @api_view(['POST'])
-# def logout(request):
-#     return
+# def logoutuser(request):
+#     logout(request)
+#     return Response(status=status.HTTP_200_OK)
+
+
+
+
+
 
 #CRUD OPERATIONS
 
@@ -69,6 +101,7 @@ def endpoints(request):
     return Response (data)
 
 @api_view(['GET','POST'])
+
 @permission_classes([IsAuthenticated])
 def users_list(request):
     if request.method == 'GET':
