@@ -11,11 +11,14 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
+#authorization
+from .decorators import allowed_users
+
 #login 
-# from base.forms import createUserForm
-# from django.contrib import messages
-#from django.contrib.auth import login, authenticate , logout 
-# from django.contrib.auth.decorators import login_required
+from base.forms import createUserForm
+from django.contrib import messages
+from django.contrib.auth import  authenticate , logout 
+from django.contrib.auth.decorators import login_required
 
 #models
 from .models import CustomUser,CustomUserManager, Messages,UserProfile, ChildInformation,MissingPersons,Reports,Alerts
@@ -50,42 +53,42 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 class MyTokenObtainPairview(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
-# #LOGIN/LOGOOUT/REGISTRATION AND AUTHORIZATION
-# @api_view(['POST'])
-# def login(request):
-#     if request.method == 'POST':
-#         email = request.POST.get('email')
-#         password = request.POST.get('password')
+#LOGIN/LOGOOUT/REGISTRATION AND AUTHORIZATION
+@api_view(['POST'])
+def login(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
         
-#         user = authenticate(request, email=email, password=password)
+        user = authenticate(request, email=email, password=password)
         
-#         if user is not None:
-#             if user.is_active:
-#                 login(request, user)
-#                 return Response(status=status.HTTP_200_OK)
-#             else:
-#                 return Response(status=status.HTTP_400_BAD_REQUEST)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                return Response (status= status.HTTP_200_OK )
+            else:
+                return Response ( status= status.HTTP_400_BAD_REQUEST )
 
-#     return
+    return
 
 
-# @api_view(['POST'])
-# def sign_up(request):
-#     if request.user.is_authenticated:
-#         return redirect ('')
-#     else:
+@api_view(['POST'])
+def sign_up(request):
+    if request.user.is_authenticated:
+        return redirect ('')
+    else:
 
-#     #     form = createUserForm(request.POST)
-#     #     if form.is_valid():
-#     #         form.save()
-#     #         user = form.cleaned_data.get['email']
-#     #         messages.success(request, 'Account was created for' + user)
-#     #     return Response (status= status.HTTP_201_OK)
+        form = createUserForm(request.POST)
+        if form.is_valid():
+            form.save()
+            user = form.cleaned_data.get('email')
+            messages.success(request, f'account was successfully created for {user}')
+        return Response (status= status.HTTP_200_OK)
 
-# @api_view(['POST'])
-# def logoutuser(request):
-#     logout(request)
-#     return Response(status=status.HTTP_200_OK)
+@api_view(['POST'])
+def logoutuser(request):
+    logout(request)
+    return Response(status=status.HTTP_200_OK)
 
 
 
@@ -101,8 +104,8 @@ def endpoints(request):
     return Response (data)
 
 @api_view(['GET','POST'])
-
 @permission_classes([IsAuthenticated])
+@allowed_users(allowed_roles=['staff', 'admin', 'lawenforcer'])
 def users_list(request):
     if request.method == 'GET':
         users = UserProfile.objects.all()
@@ -118,7 +121,8 @@ def users_list(request):
         
 
 @api_view(['GET','PUT', 'DELETE'])
-@permission_classes([IsAuthenticated]) 
+@permission_classes([IsAuthenticated])
+@allowed_users(allowed_roles=['admin', 'staff', 'lawenforcer']) 
 def user_details(request, username):
     user = get_object_or_404(UserProfile, username=username)
 
@@ -145,8 +149,9 @@ def user_details(request, username):
 
 @api_view(['GET','POST'])
 @permission_classes([IsAuthenticated])
+@allowed_users(allowed_roles=['admin', 'lawenforcer', 'parent','guardian'])
 def child_details(request):
-
+ 
     if request.method == 'GET':
         query = request.GET.get('query')
         if query == None:
@@ -172,6 +177,7 @@ def child_details(request):
 
 @api_view(['GET','PUT','DELETE'])
 @permission_classes([IsAuthenticated])
+@allowed_users(allowed_roles=['admin','lawenforcer', 'parent','guardian'])
 def individual_child_details(request, child_name):
     child_information = ChildInformation.objects.get(child_name=child_name)
     
@@ -199,6 +205,7 @@ def individual_child_details(request, child_name):
 
 @api_view(['GET','POST'])
 @permission_classes([IsAuthenticated])
+@allowed_users(allowed_roles=['admin', 'staff', 'lawenforcer'])
 def missing_person_details(request):
 
     if request.method == 'GET':
@@ -226,6 +233,7 @@ def missing_person_details(request):
 
 @api_view(['GET','PUT','DELETE'])
 @permission_classes([IsAuthenticated])
+@allowed_users(allowed_roles=['admin', 'lawenforcer'])
 def individual_missing_person(request, name):
     missing_person = MissingPersons.objects.get(name=name)
     
@@ -259,6 +267,7 @@ def reports(request):
     if request.method =='GET':
         serializer = ReportsSerializer(report, many=True)
         return Response(serializer.data)
+    
     
     if request.method =='POST':
         report = Reports.objects.create(

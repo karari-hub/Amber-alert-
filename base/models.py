@@ -1,9 +1,11 @@
 from email.policy import default
 from enum import unique
 from typing import Any
+from unittest.util import _MAX_LENGTH
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import PermissionsMixin
 
 # Create your models here.
 class CustomUserManager(BaseUserManager):
@@ -51,7 +53,6 @@ class CustomUserManager(BaseUserManager):
       user = self.create_user(email, password = password, is_parent=True)
       return user
 
-   
 
 
 class CustomUser(AbstractBaseUser):      
@@ -66,6 +67,7 @@ class CustomUser(AbstractBaseUser):
    law_enforcer = models.BooleanField(default=False)
    citizen  = models.BooleanField(default=False)
    timestamp = models.DateTimeField(auto_now_add=True)
+   module_perm = models.CharField(max_length=255, blank=True, null=True)
    
    
      
@@ -107,8 +109,13 @@ class CustomUser(AbstractBaseUser):
    def is_citizen(self):
       return self.citizen
    
+   def has_perm(self, perm, obj = None):
+      return True
    
    
+   def has_module_perms(self, app_label):
+      return True
+
 
 
 
