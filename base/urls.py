@@ -2,6 +2,9 @@ from django.urls import path
 from . import views
 from .views import MyTokenObtainPairview
 
+#password reset import
+from django.contrib.auth import views as auth_views
+
 #simplejwt authentification 
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
@@ -9,7 +12,7 @@ from rest_framework_simplejwt.views import (
 
 #url patterns 
 urlpatterns =[
-    #endpoint urls
+        #endpoint urls
     path('', views.endpoints),
 
     #token views
@@ -20,6 +23,8 @@ urlpatterns =[
     path('login/', views.login, name='login'),
     path('logout/', views.logoutuser, name='logout'),
     path('sign_up/', views.sign_up, name='signup'),
+    
+    
 
     #crud view urls
     path('userprofile/', views.users_list, name='userprofile'),
@@ -30,6 +35,19 @@ urlpatterns =[
     path('reports/<report_type>', views.report_types, name='reporttypes'),
     path('missing person/', views.missing_person_details, name='missingperson'),
     path('missing person/<name>/', views.individual_missing_person, name='individualmissingperson'),
-    path('alerts/', views.alerts, name='alerts')
+    path('alerts/', views.alerts, name='alerts'),
 
+
+    #reset password urls 
+    # (email body template)-Someone asked for password reset for email {{ email }}. Follow the link below:
+    #{{ protocol}}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}
+    
+    
+    path('reset_password/', auth_views.PasswordResetView.as_view(), name='reset_password'),
+    path('reset_password_sent/', auth_views.PasswordResetDoneView.as_view(), name='reset_password_sent'),
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='reset_password_confirm'),
+    path('reset_password_complete/', auth_views.PasswordResetCompleteView.as_view(), name='reset_password_complete'),
+    
 ]
+
+  
