@@ -75,7 +75,7 @@ def login(request):
 @api_view(['POST'])
 def sign_up(request):
     if request.user.is_authenticated:
-        return redirect ('')
+        return redirect ('login')
     else:
 
         form = createUserForm(request.POST)
@@ -105,7 +105,7 @@ def endpoints(request):
 
 @api_view(['GET','POST'])
 @permission_classes([IsAuthenticated])
-@allowed_users(allowed_roles=['staff', 'admin', 'lawenforcer'])
+@allowed_users(allowed_roles=[])
 def users_list(request):
     if request.method == 'GET':
         users = UserProfile.objects.all()
@@ -122,7 +122,7 @@ def users_list(request):
 
 @api_view(['GET','PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
-@allowed_users(allowed_roles=['admin', 'staff', 'lawenforcer']) 
+@allowed_users(allowed_roles=[]) 
 def user_details(request, username):
     user = get_object_or_404(UserProfile, username=username)
 
@@ -149,7 +149,7 @@ def user_details(request, username):
 
 @api_view(['GET','POST'])
 @permission_classes([IsAuthenticated])
-@allowed_users(allowed_roles=['admin', 'lawenforcer', 'parent','guardian'])
+@allowed_users(allowed_roles=[])
 def child_details(request):
  
     if request.method == 'GET':
@@ -205,7 +205,7 @@ def individual_child_details(request, child_name):
 
 @api_view(['GET','POST'])
 @permission_classes([IsAuthenticated])
-@allowed_users(allowed_roles=['admin', 'staff', 'lawenforcer'])
+@allowed_users(allowed_roles=[])
 def missing_person_details(request):
 
     if request.method == 'GET':
@@ -233,7 +233,7 @@ def missing_person_details(request):
 
 @api_view(['GET','PUT','DELETE'])
 @permission_classes([IsAuthenticated])
-@allowed_users(allowed_roles=['admin', 'lawenforcer'])
+@allowed_users(allowed_roles=[])
 def individual_missing_person(request, name):
     missing_person = MissingPersons.objects.get(name=name)
     
@@ -300,6 +300,7 @@ def report_types(request, report_type):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def alerts(request):
 
     if request.method =='GET':

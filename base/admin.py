@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import  CustomUser, UserProfile, ChildInformation, MissingPersons,Reports,Alerts,AlertRecipients,Messages
+from .models import  CustomUser, UserProfile, ChildInformation, MissingPersons,Reports,Alerts,Messages
 
 
 from django.contrib.auth import get_user_model
@@ -23,5 +23,4 @@ admin.site.register(ChildInformation)
 admin.site.register(MissingPersons)
 admin.site.register(Reports)
 admin.site.register(Alerts)
-admin.site.register(AlertRecipients)
 admin.site.register(Messages)
