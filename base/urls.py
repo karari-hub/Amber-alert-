@@ -38,7 +38,7 @@ urlpatterns =[
     path('alerts/', views.alerts, name='alerts'),
 
 
-    #reset password urls 
+    #reset password urls (classbasesviews url patterns)
     # (email body template)-Someone asked for password reset for email {{ email }}. Follow the link below:
     #{{ protocol}}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}
     
