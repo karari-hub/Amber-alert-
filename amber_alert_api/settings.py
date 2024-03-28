@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+import os
+from pickle import FALSE
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -46,6 +48,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     
     'corsheaders',
+    
+    'storages',
 ]
 
 
@@ -94,8 +98,12 @@ WSGI_APPLICATION = 'amber_alert_api.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'amber models',
+        'USER': 'postgres',
+        'PASSWORD': 'braivy1098',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -204,3 +212,15 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER=''
 EMAIL_HOST_PASSWORD=''
+
+
+#media root 
+MEDIA_URL = '/images/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
+
+# amazon s3 configuration
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.s3Boto3Storage'
+AWS_ACCESS_KEY_ID = ''
+AWS_SECRET_ACCESS_KEY = ''
+AWS_STORAGE_BUCKET_NAME = 'amberalert-api'
+AWS_QUEEYSTRING_AUTH =False 
