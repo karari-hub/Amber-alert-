@@ -1,5 +1,6 @@
 from email.policy import default
 from enum import unique
+from sys import maxsize
 from typing import Any
 from django.db import models
 from django.contrib.auth.models import User
@@ -7,6 +8,9 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 
 # Create your models here.
+
+def upload_to(instance, filename):
+    return 'images/{filename}'.format(filename=filename)
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, is_active=True, is_parent=False, is_guardian=False, is_law_enforcer=False, **extra_fields):
@@ -72,12 +76,20 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def get_short_name(self):
         return self.email
+    
+    
+class Images(models.Model):
+    missingperson_image = models.ImageField(null=True, blank=True, upload_to=upload_to)
+    profile_image=models.ImageField(null=True, blank=True, upload_to=upload_to)
+    
+    def __str__(self):
+        return self.missingperson_image and self.profile_image
 
 class UserProfile(models.Model):
 
     user = models.ForeignKey(CustomUser, null=True, on_delete=models.CASCADE)
     bio = models.TextField(max_length=255, null=True, blank=True)
-
+    profle_image = models.ForeignKey(Images, null=True, on_delete=models.SET_NULL)
     def __str__(self):
         return str(self.user)
 
@@ -108,6 +120,7 @@ class ChildInformation(models.Model):
 class MissingPersons(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
     location = models.ForeignKey(LocationData, on_delete=models.SET_NULL, null=True)
+    missingperson_image = models.ForeignKey(Images, on_delete=models.SET_NULL, null=True, blank=True)
     name = models.CharField(max_length=255, null=True)
     date_of_birth = models.DateTimeField()
     gender = models.CharField(max_length=50)
@@ -132,6 +145,9 @@ class Reports(models.Model):
     report_body = models.TextField(blank=True, null=True)
     contact_information = models.CharField(max_length=255, blank=True, null=True)
     police_report_number = models.CharField(max_length=255, null=True)
+    
+    class Meta:
+        ordering = ('-created','-updated')
 
     def __str__(self):
         return f"{self.report_type} {self.report_body}"
@@ -149,11 +165,14 @@ class Alerts(models.Model):
     report = models.ForeignKey(Reports, on_delete=models.SET_NULL, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    STATUS = (
+    STATUS = [
         ("Pending", "Pending"),
         ("Found", "Found")
-    )
+    ]
     status = models.CharField(max_length=50, choices=STATUS, null=True)
+    
+    class Meta:
+        ordering = ('-created','-updated')
 
     def __str__(self):
        return f'{self.alert_title} {self.alert_type} {self.alert_body} {self.created} {self.updated}'
@@ -165,7 +184,11 @@ class Messages(models.Model):
    created = models.DateTimeField(auto_now_add=True)
    updated = models.DateTimeField(auto_now=True)
    body = models.CharField(max_length=255,null=True, blank=True)
+   
+   class Meta:
+       ordering = ('-updated',)
 
 
    def __str__(self):
       return self.body
+  

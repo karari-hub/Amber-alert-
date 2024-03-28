@@ -1,3 +1,4 @@
+from email.mime import image
 from inspect import isasyncgenfunction
 from urllib import response
 from django.shortcuts import render, redirect
@@ -165,6 +166,7 @@ def child_details(request):
             child_name =request.data['child name'],
             date_of_birth = request.data['date of birth'],
             gender = request.data['gender'],
+            missingperson_image= request.data['missingperson_image'],
             physical_description =request.data['physical description'],
             location = request.data['location'],
             parent_contact = request.data['parent contact'],
@@ -222,6 +224,7 @@ def missing_person_details(request):
             name = request.data['name'],
             date_of_birth= request.data['date of birth'],
             gender = request.data['gender'],
+            missingperson_image = request.data['missingperson_image'],
             physical_description= request.data['physical description'],
             family_contact = request.data['family contact']
 
@@ -260,12 +263,16 @@ def individual_missing_person(request, name):
 
     
 @api_view(['GET', 'POST'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def reports(request):
     report= Reports.objects.all()
 
     if request.method =='GET':
-        serializer = ReportsSerializer(report, many=True)
+        query= request.GET.get('query')
+        if query == None:
+            query=''
+        report = Reports.objects.filter(Q(name__icontains=query)|(Q(child=query))|(Q(missing_person=query)))        
+        serializer = ReportsSerializer(report, many=False)
         return Response(serializer.data)
     
     
@@ -273,15 +280,38 @@ def reports(request):
         report = Reports.objects.create(
             child = request.data['child'],
             missing_person = request.data['missig person'],
+            missingperson_image = request.data['missingperson_image'],
+            repot_type = request.data['report type'],
+            report_body = request.data['report body'],
+            location = request.data['location'],
+            contact_information= request.data['contact information'],
+            police_report_number = request.data['police report number']
+            
+        )
+        
+        serializer = ReportsSerializer(report, many = False)
+        return Response(serializer.data)
+    
+    if request.method == 'PUT':
+        report = Reports.objects.update(
+            child = request.data['child'],
+            missing_person = request.data['missig person'],
+            missingperson_image = request.data['missingperson_image'],
+            image  = request.data['missingperson_image'],
             repot_type = request.data['report type'],
             report_body = request.data['report body'],
             location = request.data['location'],
             contact_information= request.data['contact information'],
             police_report_number = request.data['police report number']
         )
-
+        
         serializer = ReportsSerializer(report, many = False)
         return Response(serializer.data)
+    
+    if request.method == 'DELETE':
+        report.delete()
+        return redirect('reports')
+
     
 
 @api_view(['GET'])

@@ -17,7 +17,7 @@ class CustomUsermanagerSerializer(ModelSerializer):
 class UserProfileSerializer(ModelSerializer):
     class Meta:
         model = UserProfile
-        fields =('username', 'email', 'bio', 'role')
+        fields ='__all__'
 
 class UserDetailserializer(ModelSerializer):
     class Meta:
