@@ -1,6 +1,6 @@
 from dataclasses import fields
 from rest_framework.serializers import ModelSerializer,SerializerMethodField
-from .models import CustomUserManager, UserProfile, UserProfile,ChildInformation,Reports,MissingPersons,Alerts, CustomUser, CustomUserManager
+from .models import CustomUserManager, LocationData, UserProfile, UserProfile,ChildInformation,Reports,MissingPersons,Alerts, CustomUser, CustomUserManager
 
 #serializers 
 class CustomUserSerializer(ModelSerializer):
@@ -66,4 +66,10 @@ class AlertsSerializer(ModelSerializer):
     user = CustomUserSerializer()
     class Meta:
         model = Alerts
+        fields = '__all__'
+        
+        
+class LocationSerializer(ModelSerializer):
+    class Meta:
+        model = LocationData
         fields = '__all__'

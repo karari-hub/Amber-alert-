@@ -22,12 +22,12 @@ from django.contrib.auth import  authenticate , logout
 from django.contrib.auth.decorators import login_required
 
 #models
-from .models import CustomUser,CustomUserManager, Messages,UserProfile, ChildInformation,MissingPersons,Reports,Alerts
+from .models import CustomUser,CustomUserManager, LocationData, Messages,UserProfile, ChildInformation,MissingPersons,Reports,Alerts
 from django.db.models import Q
 
 #serializers
 from base import serializers
-from .serializers import CustomUserSerializer,CustomUsermanagerSerializer,UserProfileSerializer,ChildInformationSerializer, UserDetailserializer, ReportsSerializer,MissinpersonSerializer,MissingchildreportSeriallzer,MissingpersonreportSerializer,AlertsSerializer
+from .serializers import CustomUserSerializer,CustomUsermanagerSerializer,UserProfileSerializer,ChildInformationSerializer, UserDetailserializer, ReportsSerializer,MissinpersonSerializer,MissingchildreportSeriallzer,MissingpersonreportSerializer,AlertsSerializer,LocationSerializer
 
 #CUSTOM TOKEN IMPORT 
 # from django.contrib.auth.models import User,AbstractBaseUser
@@ -36,6 +36,9 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 #import forms
 from django.contrib.auth.forms import UserCreationForm
+
+#import geohash for alert filtering 
+from geohash2 import encode , decode
 
 # Create your views here.
 
@@ -263,7 +266,7 @@ def individual_missing_person(request, name):
 
     
 @api_view(['GET', 'POST'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def reports(request):
     report= Reports.objects.all()
 
@@ -273,6 +276,7 @@ def reports(request):
             query=''
         report = Reports.objects.filter(Q(name__icontains=query)|(Q(child=query))|(Q(missing_person=query)))        
         serializer = ReportsSerializer(report, many=False)
+        
         return Response(serializer.data)
     
     
@@ -329,16 +333,46 @@ def report_types(request, report_type):
         return Response(serializer.data)
 
 
-@api_view(['GET'])
+
+
+
+
+@api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def alerts(request):
-
+    def filter_alerts(user_latitude, user_longitude, user_precision, alerts):
+        user_geohash = encode (user_latitude,user_longitude, precision=user_precision)
+        filtered_alerts = []
+        
+        for alert in alerts:
+            alert_latitude, alert_longitude = alert.latitude, alert.longitude
+            alert_geohash = encode (alert_latitude,alert_longitude, precision=user_precision)
+            if alert_geohash == user_geohash:
+                filtered_alerts.append(alert)
+        return filtered_alerts
+    
     if request.method =='GET':
-      
-        alert = Alerts.objects.all()
-        serializer = AlertsSerializer(alert,many=True)
-
+        user_latitude = float(request.query_params.get('latitude',0.0))
+        user_longitude = float(request.query_params.get('longitude',0.0))
+        user_precision =  int(request.query_params.get('precision', 7))
+        
+        alerts = Alerts.objects.all()
+        filtered_alerts = filter_alerts(user_latitude, user_longitude, user_precision, alerts)
+        serializer = AlertsSerializer(filtered_alerts)
         return Response(serializer.data)
+    
+    
+
+    
+
+        
+        
 
 
+
+
+        
+
+
+ 
 

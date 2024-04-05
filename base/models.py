@@ -85,15 +85,10 @@ class Images(models.Model):
     def __str__(self):
         return self.missingperson_image and self.profile_image
 
-class UserProfile(models.Model):
 
-    user = models.ForeignKey(CustomUser, null=True, on_delete=models.CASCADE)
-    bio = models.TextField(max_length=255, null=True, blank=True)
-    profle_image = models.ForeignKey(Images, null=True, on_delete=models.SET_NULL)
-    def __str__(self):
-        return str(self.user)
 
 class LocationData(models.Model):
+    user_location = models.ForeignKey(CustomUser, null=True, on_delete=models.SET_NULL)
     country = models.CharField(max_length=255, null=True)
     county = models.CharField(max_length=255, null=True)
     district = models.CharField(max_length=255, null=True)
@@ -101,9 +96,24 @@ class LocationData(models.Model):
     location = models.CharField(max_length=255, null=True)
     sublocation = models.CharField(max_length=255, null=True)
     town = models.CharField(max_length=255, null=True)
+    
+    latitude = models.FloatField(null = True,blank=True)
+    logitude = models.FloatField(null = True, blank=True)
 
     def __str__(self):
         return self.county
+
+
+class UserProfile(models.Model):
+
+    user = models.ForeignKey(CustomUser, null=True, on_delete=models.CASCADE)
+    bio = models.TextField(max_length=255, null=True, blank=True)
+    profle_image = models.ForeignKey(Images, null=True, on_delete=models.SET_NULL)
+    user_location = models.ForeignKey(LocationData, null=True, on_delete=models.SET_NULL, blank=True)
+    def __str__(self):
+        return str(self.user)
+
+
 
 class ChildInformation(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
