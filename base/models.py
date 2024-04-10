@@ -106,12 +106,12 @@ class LocationData(models.Model):
 
 class UserProfile(models.Model):
 
-    user = models.ForeignKey(CustomUser, null=True, on_delete=models.CASCADE)
+    username = models.ForeignKey(CustomUser, null=True, on_delete=models.SET_NULL)
     bio = models.TextField(max_length=255, null=True, blank=True)
     profle_image = models.ForeignKey(Images, null=True, on_delete=models.SET_NULL)
     user_location = models.ForeignKey(LocationData, null=True, on_delete=models.SET_NULL, blank=True)
     def __str__(self):
-        return str(self.user)
+        return str(self.username)
 
 
 
@@ -141,7 +141,8 @@ class MissingPersons(models.Model):
         return self.name
 
 class Reports(models.Model):
-    users = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
+    name = models.CharField(max_length=255, null=True,blank=True)
     child = models.ForeignKey(ChildInformation, on_delete=models.SET_NULL, null=True, blank=True)
     missing_person = models.ForeignKey(MissingPersons, on_delete=models.SET_NULL, null=True, blank=True)
     location = models.ForeignKey(LocationData, on_delete=models.SET_NULL, null=True, blank=True)

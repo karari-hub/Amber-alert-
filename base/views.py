@@ -104,12 +104,12 @@ def logoutuser(request):
 #reminder "add image upload function and connect it to s3"
 @api_view(['GET'])
 def endpoints(request):
-    data =['/userprofile','/userprofile/:username', '/child details','/reports', '/missing person','/alerts', '/login', '/logout', '/signup']
+    data =['/userprofile','/userprofile/:username', '/child details','/child details/<child_name>/','/reports', 'reports/<report_type>/' , '/missing person','/alerts', '/login', '/logout', '/signup']
     return Response (data)
 
 @api_view(['GET','POST'])
-@permission_classes([IsAuthenticated])
-@allowed_users(allowed_roles=[])
+# @permission_classes([IsAuthenticated])
+# @allowed_users(allowed_roles=[])
 def users_list(request):
     if request.method == 'GET':
         users = UserProfile.objects.all()
@@ -125,10 +125,10 @@ def users_list(request):
         
 
 @api_view(['GET','PUT', 'DELETE'])
-@permission_classes([IsAuthenticated])
-@allowed_users(allowed_roles=[]) 
+# @permission_classes([IsAuthenticated])
+# @allowed_users(allowed_roles=[]) 
 def user_details(request, username):
-    user = get_object_or_404(UserProfile, username=username)
+    user = UserProfile.objects.get(username=username)
 
     if request.method =='GET':
         serializer = UserDetailserializer(user)
@@ -152,17 +152,15 @@ def user_details(request, username):
         
 
 @api_view(['GET','POST'])
-@permission_classes([IsAuthenticated])
-@allowed_users(allowed_roles=[])
+# @permission_classes([IsAuthenticated])
+# @allowed_users(allowed_roles=[])
 def child_details(request):
  
-    if request.method == 'GET':
-        query = request.GET.get('query')
-        if query == None:
-            query = ''
-            child_information = ChildInformation.objects.filter(Q(child_name__icontains = query)|(Q(physical_description__icontains=query))|(Q(parent_contact__icontains=query)))        
+    if request.method =='GET':
+        child_information = ChildInformation.objects.all()
         serializer = ChildInformationSerializer(child_information, many=True)
         return Response(serializer.data)
+    
         
     if request.method =='POST':
         child_information = ChildInformation.objects.create(
@@ -181,15 +179,20 @@ def child_details(request):
 
 
 @api_view(['GET','PUT','DELETE'])
-@permission_classes([IsAuthenticated])
-@allowed_users(allowed_roles=['admin','lawenforcer', 'parent','guardian'])
+# @permission_classes([IsAuthenticated])
+# @allowed_users(allowed_roles=['admin','lawenforcer', 'parent','guardian'])
 def individual_child_details(request, child_name):
     child_information = ChildInformation.objects.get(child_name=child_name)
     
     
-    if request.method =='GET':
-        serializer = ChildInformationSerializer(child_information, many=False)
-        return Response(serializer.data)
+    if request.method == 'GET':
+        query = request.GET.get('query')
+        if query == None:
+            query = ''
+            child_information = ChildInformation.objects.filter(Q(child_name__icontains = query)|(Q(physical_description__icontains=query))|(Q(parent_contact__icontains=query)))        
+        serializer = ChildInformationSerializer(child_information, many=True)
+        return Response(serializer.data)    
+    
 
     if request.method == 'PUT':
         child_information.child_name = request.data['child_name']
@@ -209,17 +212,14 @@ def individual_child_details(request, child_name):
 
 
 @api_view(['GET','POST'])
-@permission_classes([IsAuthenticated])
-@allowed_users(allowed_roles=[])
+# @permission_classes([IsAuthenticated])
+# @allowed_users(allowed_roles=[])
 def missing_person_details(request):
-
+    missing_person = MissingPersons.objects.all()
+    
     if request.method == 'GET':
-        query= request.GET.get('query')
-        if query == None:
-            query=''
-        missing_person = MissingPersons.objects.filter(Q(name__icontains=query)|(Q(physical_description__icontains=query))|(Q(family_contact__icontains=query)))
-        serializer = MissinpersonSerializer(missing_person, many=True)
-        return Response (serializer.data)
+        serializer = MissinpersonSerializer(missing_person, many=False)
+        return Response(serializer.data)
 
         
     if request.method == 'POST':
@@ -238,14 +238,19 @@ def missing_person_details(request):
 
 
 @api_view(['GET','PUT','DELETE'])
-@permission_classes([IsAuthenticated])
-@allowed_users(allowed_roles=[])
+# @permission_classes([IsAuthenticated])
+# @allowed_users(allowed_roles=[])
 def individual_missing_person(request, name):
     missing_person = MissingPersons.objects.get(name=name)
     
     if request.method == 'GET':
-        serializer = MissinpersonSerializer(missing_person, many=False)
-        return Response(serializer.data)
+        query= request.GET.get('query')
+        if query == None:
+            query=''
+            missing_person = MissingPersons.objects.filter(Q(name__icontains=query)|(Q(physical_description__icontains=query))|(Q(family_contact__icontains=query)))
+        serializer = MissinpersonSerializer(missing_person, many=True)
+        return Response (serializer.data)
+
 
     if request.method =='PUT':
         missing_person.name = request.data['name']
@@ -266,16 +271,13 @@ def individual_missing_person(request, name):
 
     
 @api_view(['GET', 'POST'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def reports(request):
-    report= Reports.objects.all()
+
 
     if request.method =='GET':
-        query= request.GET.get('query')
-        if query == None:
-            query=''
-        report = Reports.objects.filter(Q(name__icontains=query)|(Q(child=query))|(Q(missing_person=query)))        
-        serializer = ReportsSerializer(report, many=False)
+        report= Reports.objects.all()      
+        serializer = ReportsSerializer(report, many=True)
         
         return Response(serializer.data)
     
@@ -312,22 +314,22 @@ def reports(request):
         serializer = ReportsSerializer(report, many = False)
         return Response(serializer.data)
     
-    if request.method == 'DELETE':
-        report.delete()
-        return redirect('reports')
+
 
     
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def report_types(request, report_type):
         
     if request.method =='GET':    
-        report = Reports.objects.get(report_type=report_type)
-        if report_type == 'Missing child':
-            serializer = MissingchildreportSeriallzer(report, many=True)
-        if report_type == 'Missing person':
-            serializer = MissingpersonreportSerializer(report,many=True)
+        reports = Reports.objects.all()
+        for report in reports:
+            if report_type == 'Missing child':
+                serializer = MissingchildreportSeriallzer(report, many=True)
+            else:    
+    
+                 serializer = MissingpersonreportSerializer(report,many=True)
         
         
         return Response(serializer.data)
@@ -338,7 +340,7 @@ def report_types(request, report_type):
 
 
 @api_view(['GET', 'POST'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def alerts(request):
     def filter_alerts(user_latitude, user_longitude, user_precision, alerts):
         user_geohash = encode (user_latitude,user_longitude, precision=user_precision)
@@ -351,14 +353,21 @@ def alerts(request):
                 filtered_alerts.append(alert)
         return filtered_alerts
     
-    if request.method =='GET':
+    if request.method == 'GET':
+        alerts = Alerts.objects.all()
+        serializer = AlertsSerializer(alerts, many=True)
+        return Response(serializer.data)
+    
+    
+    
+    if request.method =='POST':
         user_latitude = float(request.query_params.get('latitude',0.0))
         user_longitude = float(request.query_params.get('longitude',0.0))
         user_precision =  int(request.query_params.get('precision', 7))
         
         alerts = Alerts.objects.all()
-        filtered_alerts = filter_alerts(user_latitude, user_longitude, user_precision, alerts)
-        serializer = AlertsSerializer(filtered_alerts)
+        filtered_alerts = filter_alerts(user_latitude, user_longitude, user_precision,alerts)
+        serializer = AlertsSerializer(filtered_alerts, many=True)
         return Response(serializer.data)
     
     

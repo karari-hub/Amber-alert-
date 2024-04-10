@@ -22,7 +22,7 @@ class UserProfileSerializer(ModelSerializer):
 class UserDetailserializer(ModelSerializer):
     class Meta:
         model = UserProfile
-        exclude = ['bio']
+        exclude = '__all__'
        
 
 class ChildInformationSerializer(ModelSerializer):
